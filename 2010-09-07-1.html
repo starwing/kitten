@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.7: http://docutils.sourceforge.net/" />
+<title>kitten 语法纲要</title>
+<link rel="stylesheet" href="D:/utility/python/lib/site-packages/docutils/writers/html4css1/html4css1.css" type="text/css" />
+</head>
+<body>
+<div class="document" id="kitten">
+<h1 class="title">kitten 语法纲要</h1>
+
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="auto-toc simple">
+<li><a class="reference internal" href="#id1" id="id9">1&nbsp;&nbsp;&nbsp;设计总纲</a></li>
+<li><a class="reference internal" href="#id2" id="id10">2&nbsp;&nbsp;&nbsp;词法单位</a><ul class="auto-toc">
+<li><a class="reference internal" href="#id3" id="id11">2.1&nbsp;&nbsp;&nbsp;字符集</a></li>
+<li><a class="reference internal" href="#id4" id="id12">2.2&nbsp;&nbsp;&nbsp;标识符</a></li>
+<li><a class="reference internal" href="#id5" id="id13">2.3&nbsp;&nbsp;&nbsp;操作符</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id6" id="id14">3&nbsp;&nbsp;&nbsp;语法结构</a></li>
+<li><a class="reference internal" href="#id7" id="id15">4&nbsp;&nbsp;&nbsp;类型系统、模式匹配和重载的源泉——类型元组</a></li>
+<li><a class="reference internal" href="#id8" id="id16">5&nbsp;&nbsp;&nbsp;备忘录</a></li>
+</ul>
+</div>
+<div class="section" id="id1">
+<h1><a class="toc-backref" href="#id9">1&nbsp;&nbsp;&nbsp;设计总纲</a></h1>
+<p>kitten 语言是一种 <strong>静态强类型多范式通用编程语言</strong> 。 其主要的设计决策倾向于：</p>
+<blockquote>
+<ul class="simple">
+<li>不会提供策略，但一定提供机制。</li>
+<li>会有一个致密的语言核心，和一套缺省的语法糖。</li>
+<li>完全类型安全，支持类型演算。</li>
+<li>所有的数据都是第一类值。表达式作为字面量被使用。</li>
+<li>完全支持纯正的函数式编程和编译期执行。</li>
+<li>有完整的包管理协议，支持建立完整的面向对象模型，有附带的最简单的面向对象
+模型。</li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="id2">
+<h1><a class="toc-backref" href="#id10">2&nbsp;&nbsp;&nbsp;词法单位</a></h1>
+<div class="section" id="id3">
+<h2><a class="toc-backref" href="#id11">2.1&nbsp;&nbsp;&nbsp;字符集</a></h2>
+<p>kitten 可以使用 ASCII 大于等于 32 的所有字符，以及所有 Unicode 字符。在没有特
+殊声明的情况下，kitten 的源代码默认是 Unicode 格式的。当然这可以通过特殊指令在
+源代码中改变。</p>
+</div>
+<div class="section" id="id4">
+<h2><a class="toc-backref" href="#id12">2.2&nbsp;&nbsp;&nbsp;标识符</a></h2>
+<p>TODO: 目前并不确定是否允许符号是标识符的一部分，也就是说，并不确定是否根据字符
+本身的属性（所在区域、是否符号）来确定字符本身的语法成分。</p>
+</div>
+<div class="section" id="id5">
+<h2><a class="toc-backref" href="#id13">2.3&nbsp;&nbsp;&nbsp;操作符</a></h2>
+<p>TODO: 操作符有和运算符一样的问题，因此暂不定义。</p>
+</div>
+</div>
+<div class="section" id="id6">
+<h1><a class="toc-backref" href="#id14">3&nbsp;&nbsp;&nbsp;语法结构</a></h1>
+<p>在语法结构中，我们采用 BNF 记号来表示语法。BNF 记号由 <em>终结符*， *非终结符</em> 和
+<em>量词</em> 组成，在 BNF 表达式中，用引号引起的部分叫做终结符，它会原样出现在原始待
+分析的文本中。每一条 BNF 语句都定义了一个 <em>非终结符</em></p>
+<pre class="literal-block">
+BNF_nonation := nonterminal &quot;:=&quot; defintion
+</pre>
+<p>定义语句是由按照顺序的原子语句顺次组成的:</p>
+<pre class="literal-block">
+definition := atom*
+</pre>
+<p>上面的星号就是量词，表示 atom 可以出现 0 次或者多次。量词分为好几种:</p>
+<pre class="literal-block">
+atom := token &quot;*&quot; | token &quot;+&quot; | token &quot;?&quot; | token1 &quot;|&quot; token2 | &quot;(&quot; atom &quot;)&quot;
+</pre>
+<p>星号表示 token 可以出现 0 次或者多次，加号代表 token 可以出现 1 次或者多次，而
+问号代表 token 可以出现 0 次或者 1 次。竖线代表当前位置可以是 token1，也可以是
+token2，同时，也支持使用小括号来分组 atom。</p>
+<p>kitten 的语法很灵活，对于 kitten 来做，只有一种合法的语法形式：表达式:</p>
+<pre class="literal-block">
+program := (expression | space)+
+</pre>
+<p>kitten 的程序就是表达式和空白符交替的序列。 kitten 有很多种表达式，主要有这么
+几种:</p>
+<pre class="literal-block">
+expression := postfix | unary_expr | binary_expr
+postfix := primary_expr type_tuple
+unary_expr := unary_op primary_expr
+binary_expr := primary_expr binary_op primary_expr
+</pre>
+<p>主表达式 (primary_expr)，是最主要的表达式，分为标准库字面量和表达式字面量:</p>
+<pre class="literal-block">
+primary_expr := std_literal | expr_literal
+</pre>
+<p>标准库字面量是由标准库定义的，分为数字字面量、符号字面量、字符串字面量、数组、
+元组、字典等等，是基本的数据类型。</p>
+<p>而表达式字面量则代表一个未解析的表达式。在 kitten 里面，表达式也是第一类值，可
+以传递、处理。当表达式内所有的自由变量全部绑定时，就可以执行表达式。接下来，我
+们详细讨论上面没有提到的类型元组（type_tuple）和表达式字面量。</p>
+</div>
+<div class="section" id="id7">
+<h1><a class="toc-backref" href="#id15">4&nbsp;&nbsp;&nbsp;类型系统、模式匹配和重载的源泉——类型元组</a></h1>
+<p>类型元组是一种十分重要的字面量。它给出了一个名字的序列，在这个名字的序列中，每
+个名字都对应有一个类型。类型（type）是 kitten 中的一个核心基本类型。它本质上是
+类型为 type 的类型的一个实例。在 kitten 中，所有的值都必须有一个类型，而所有的
+变量可选地拥有一个类型。使用拥有类型的变量可以获得效率，而使用没有类型的变量可
+以获得灵活性。但每个值都必须有一个类型。刚才说了，类型本身也是一个实例。实例是
+一种值。因此，在 kitten 里面，一切都是值，一切都有类型。</p>
+</div>
+<div class="section" id="id8">
+<h1><a class="toc-backref" href="#id16">5&nbsp;&nbsp;&nbsp;备忘录</a></h1>
+</div>
+</div>
+</body>
+</html>
